@@ -6,6 +6,9 @@ const ParticleVisualization = () => {
   const canvasRef = useRef(null);
   const [particleCount, setParticleCount] = useState(100);
   const [speedMultiplier, setSpeedMultiplier] = useState(1);
+  const [particleSize, setParticleSize] = useState(2);
+  const [trailLength, setTrailLength] = useState(0.5);
+  const [hue, setHue] = useState(200);
   const [isRunning, setIsRunning] = useState(true);
 
   useEffect(() => {
@@ -16,18 +19,19 @@ const ParticleVisualization = () => {
     const particles = Array.from({ length: particleCount }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      radius: Math.random() * 2 + 1,
       speed: (Math.random() * 2 + 0.5) * speedMultiplier,
       angle: Math.random() * Math.PI * 2,
     }));
 
     const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.fillStyle = `rgba(0, 0, 0, ${1 - trailLength})`;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       particles.forEach((particle) => {
+        const color = `hsl(${hue}, 100%, 50%)`;
         ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+        ctx.arc(particle.x, particle.y, particleSize, 0, Math.PI * 2);
+        ctx.fillStyle = color;
         ctx.fill();
 
         if (isRunning) {
@@ -49,7 +53,7 @@ const ParticleVisualization = () => {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [particleCount, speedMultiplier, isRunning]);
+  }, [particleCount, speedMultiplier, particleSize, trailLength, hue, isRunning]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 p-4">
@@ -85,6 +89,45 @@ const ParticleVisualization = () => {
             step={0.1}
             value={[speedMultiplier]}
             onValueChange={(value) => setSpeedMultiplier(value[0])}
+          />
+        </div>
+        <div>
+          <label htmlFor="particle-size" className="block text-sm font-medium text-white mb-2">
+            Particle Size: {particleSize.toFixed(1)}
+          </label>
+          <Slider
+            id="particle-size"
+            min={0.5}
+            max={10}
+            step={0.5}
+            value={[particleSize]}
+            onValueChange={(value) => setParticleSize(value[0])}
+          />
+        </div>
+        <div>
+          <label htmlFor="trail-length" className="block text-sm font-medium text-white mb-2">
+            Trail Length: {trailLength.toFixed(2)}
+          </label>
+          <Slider
+            id="trail-length"
+            min={0}
+            max={1}
+            step={0.01}
+            value={[trailLength]}
+            onValueChange={(value) => setTrailLength(value[0])}
+          />
+        </div>
+        <div>
+          <label htmlFor="hue" className="block text-sm font-medium text-white mb-2">
+            Color Hue: {hue}
+          </label>
+          <Slider
+            id="hue"
+            min={0}
+            max={360}
+            step={1}
+            value={[hue]}
+            onValueChange={(value) => setHue(value[0])}
           />
         </div>
         <Button
